@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student Manager</title>
+<style>
+:root{
+  --primary: #8000ff; /* بنفش پررنگ */
+  --primary-dark: #4b00b5;
+  --bg: #f0e6ff;
+  --card: #ffffff;
+  --border: #c19fff;
+  --muted: #4b2e7e;
+  --radius: 16px;
+  --shadow: 0 8px 20px rgba(128,0,255,.2);
+  --sans: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+*{box-sizing:border-box;}
+body{
+  margin:0;
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--muted);
+}
+
+.wrap{max-width:900px;margin:0 auto;padding:28px 18px;}
+
+header{
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  color:#fff;
+  border-radius:20px;
+  padding:20px;
+  text-align:center;
+  box-shadow:var(--shadow);
+}
+
+header h1{margin:0;font-size:24px;}
+header p{margin:6px 0 0;font-size:14px;}
+
+.grid{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:18px;
+  margin-top:18px;
+}
+
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:16px;
+  box-shadow:var(--shadow);
+}
+
+.card h2{margin-top:0;color:var(--primary-dark);}
+
+.row{display:flex;gap:10px;flex-wrap:wrap;}
+.field{flex:1;min-width:140px;}
+label{display:block;margin:8px 0 4px;font-size:13px;color:var(--primary-dark);}
+input, select{
+  width:100%;
+  padding:10px;
+  border:1px solid var(--border);
+  border-radius:12px;
+  outline:none;
+}
+
+input:focus, select:focus{
+  border-color: var(--primary-dark);
+  box-shadow:0 0 0 3px rgba(128,0,255,.2);
+}
+
+button{
+  cursor:pointer;
+  padding:10px 14px;
+  border-radius:12px;
+  border:none;
+  background: var(--primary);
+  color:#fff;
+  font-weight:600;
+  transition:0.2s;
+}
+
+button:hover{background: var(--primary-dark);}
+.btnbar{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;}
+.info-box{
+  margin-top:12px;
+  padding:12px;
+  border:1px solid var(--border);
+  border-radius:12px;
+  background:#f0e6ff;
+  color:var(--primary-dark);
+  white-space:pre-wrap;
+}
+
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Student Manager</h1>
+    <p>Manage students, lessons, and scores easily.</p>
+  </header>
+
+  <div class="grid">
+    <section class="card">
+      <h2>Register Student</h2>
+      <div class="row">
+        <div class="field">
+          <label>First Name</label>
+          <input id="first-name" placeholder="e.g., John">
+        </div>
+        <div class="field">
+          <label>Last Name</label>
+          <input id="last-name" placeholder="e.g., Doe">
+        </div>
+      </div>
+      <div class="row">
+        <div class="field">
+          <label>Student ID</label>
+          <input id="student-id" placeholder="e.g., 123">
+        </div>
+        <div class="field">
+          <label>Birth Year</label>
+          <input id="birth-year" placeholder="e.g., 2005">
+        </div>
+      </div>
+      <div class="btnbar">
+        <button id="btn-register">Register</button>
+        <button id="btn-clear">Clear</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Lessons Management</h2>
+      <div class="btnbar">
+        <button id="btn-add-lesson">Add Lesson</button>
+        <button id="btn-remove-lesson">Remove Lesson</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Score Management</h2>
+      <div class="btnbar">
+        <button id="btn-calc-scores">Calculate Scores</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Student Info</h2>
+      <div class="btnbar">
+        <button id="btn-show-info">Show Info</button>
+        <button id="btn-remove-student">Remove Student</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Output</h2>
+      <div id="output" class="info-box">Messages will appear here...</div>
+    </section>
+  </div>
+</div>
+
+<script>
+class Student {
+  constructor(first_name, last_name, student_id, birth_year){
+    this.first_name = first_name;
+    this.last_name = last_name;
+    this.student_id = student_id;
+    this.birth_year = birth_year;
+    this.selected_lessons = [];
+    this.scores = [];
+    this.average_score = 0.0;
+  }
+  add_lessons(lessons){ this.selected_lessons.push(...lessons);}
+  calculate_average_score(){
+    if(this.scores.length>0){
+      this.average_score = this.scores.reduce((a,b)=>a+b,0)/this.scores.length;
+    }
+  }
+}
+
+let student=null;
+const output = document.getElementById("output");
+
+function log(msg){
+  output.textContent = msg;
+}
+
+document.getElementById("btn-register").addEventListener("click",()=>{
+  const fn = document.getElementById("first-name").value.trim();
+  const ln = document.getElementById("last-name").value.trim();
+  const id = parseInt(document.getElementById("student-id").value.trim());
+  const by = parseInt(document.getElementById("birth-year").value.trim());
+
+  if(!fn||!ln||isNaN(id)||isNaN(by)){
+    log("Please enter valid student information.");
+    return;
+  }
+  student = new Student(fn,ln,id,by);
+  log(`Welcome ${fn} ${ln}! You can now manage lessons and scores.`);
+});
+
+document.getElementById("btn-clear").addEventListener("click",()=>{
+  ["first-name","last-name","student-id","birth-year"].forEach(id=>document.getElementById(id).value="");
+  log("Form cleared.");
+});
+
+document.getElementById("btn-add-lesson").addEventListener("click",()=>{
+  if(!student){ log("Register a student first."); return; }
+  const lessons = ["Math","Science","History","English","Art"];
+  const selected = prompt("Available lessons: "+lessons.join(", ")+"\nWhich lessons to add? (comma separated)");
+  if(!selected) return;
+  const list = selected.split(",").map(l=>l.trim()).filter(l=>lessons.includes(l));
+  if(list.length>0){ student.add_lessons(list); log("Added lessons: "+list.join(", ")); }
+  else log("No valid lessons selected.");
+});
+
+document.getElementById("btn-remove-lesson").addEventListener("click",()=>{
+  if(!student){ log("Register a student first."); return; }
+  if(student.selected_lessons.length===0){ log("No lessons to remove."); return; }
+  const list = prompt("Your lessons: "+student.selected_lessons.join(", ")+"\nWhich lesson to remove?").trim();
+  if(student.selected_lessons.includes(list)){
+    student.selected_lessons = student.selected_lessons.filter(l=>l!==list);
+    log("Removed lesson: "+list);
+  } else log("Invalid lesson name.");
+});
+
+document.getElementById("btn-calc-scores").addEventListener("click",()=>{
+  if(!student){ log("Register a student first."); return; }
+  const lessons = student.selected_lessons.length>0 ? student.selected_lessons : ["Math","Science","History","English","Art"];
+  student.scores=[];
+  lessons.forEach(l=>{
+    const score = Math.floor(Math.random()*21);
+    student.scores.push(score);
+  });
+  student.calculate_average_score();
+  let msg = "Scores:\n";
+  lessons.forEach((l,i)=>{ msg+=`${l}: ${student.scores[i]} ${student.scores[i]<10? '(Fail)':'(Pass)'}\n`; });
+  msg+=`Average Score: ${student.average_score.toFixed(2)}`;
+  log(msg);
+});
+
+document.getElementById("btn-show-info").addEventListener("click",()=>{
+  if(!student){ log("Register a student first."); return; }
+  log(`Student Info:
+Name: ${student.first_name} ${student.last_name}
+ID: ${student.student_id}
+Birth Year: ${student.birth_year}
+Lessons: ${student.selected_lessons.join(", ")}
+Scores: ${student.scores.join(", ")}
+Average: ${student.average_score.toFixed(2)}`);
+});
+
+document.getElementById("btn-remove-student").addEventListener("click",()=>{
+  if(!student){ log("No student to remove."); return; }
+  student=null;
+  log("Student removed.");
+});
+</script>
+</body>
+</html>
